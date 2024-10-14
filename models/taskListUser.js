@@ -48,6 +48,45 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'shared_to',
       as: 'SharedToUser'
     });
+
+    TaskListUser.belongsTo(models.User, {
+      foreignKey: 'owner_id',
+      as: 'OwnerUser'
+    });
+  };
+
+  TaskListUser.prototype.getUsersInTaskList = async function () {
+
+    const taskListUsers = await TaskListUser.findAll({
+      where: { tasklist_id: this.tasklist_id },
+      include: [
+        {
+          model: sequelize.models.User,
+          as: 'SharedToUser',
+          attributes: ['id', 'userName', 'email']
+        },
+        {
+          model: sequelize.models.User,
+          as: 'OwnerUser',
+          attributes: ['id', 'userName', 'email']
+        }
+      ]
+    });
+
+    const owner = taskListUsers[0]?.OwnerUser; 
+
+    const sharedUsers = taskListUsers.map(user => user.SharedToUser);
+    const allUsers = [...sharedUsers];
+
+    if (owner) {
+      allUsers.push(owner);
+    }
+
+    const uniqueUsers = allUsers.filter((value, index, self) =>
+      index === self.findIndex((u) => u.id === value.id)
+    );
+
+    return uniqueUsers;
   };
 
   return TaskListUser;

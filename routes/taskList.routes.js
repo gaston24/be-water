@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const taskListService = require('../services/taskList.service');
+const NotificationService = require('../services/notification.service');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 router.post('/', async (req, res) => {
@@ -45,7 +46,19 @@ router.put('/:taskListId', authMiddleware, async (req, res) => {
 router.delete('/:taskListId', authMiddleware, async (req, res) => {
   const { userId } = req;
   try {
-    const message = await taskListService.deleteTaskList(req.params.taskListId, userId);
+
+    const message = await taskListService.deleteTaskList(req.params.taskListId);
+
+    // send notification to all users in task list
+    const taskList = await taskListService.getTaskListByTaskListId(req.params.taskListId)
+
+    const users = await taskList.getAllUsers();
+
+    users.forEach(async user => {
+      await NotificationService.sendNotification(user.id, 'Task has been deleted');
+    });
+
+
     res.status(200).json(message);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -55,13 +68,25 @@ router.delete('/:taskListId', authMiddleware, async (req, res) => {
 
 router.post('/share/:taskListId/:sharedToId/:permission', authMiddleware, async (req, res) => {
   const { userId } = req;
-  const { taskListId, sharedToId, permission } = req.params;
+
+//   const { taskListId, sharedToId } = req.params;
+
+//   try {
+//     const result = await taskListService.shareTaskList(taskListId, userId, sharedToId);
+
+    // send notification to sharedToId
+//     NotificationService.sendNotification(sharedToId, `You have been shared a task list`);
+
+
+//   const { taskListId, sharedToId, permission } = req.params;
   try {
     const result = await taskListService.shareTaskList(taskListId, userId, sharedToId, permission);
+
     res.json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
+  
 });
 
 router.delete('/share/:taskListId/:sharedToId', authMiddleware, async (req, res) => {

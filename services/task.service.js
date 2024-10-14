@@ -6,7 +6,6 @@ class TaskService {
   // Traer todas las tareas
   async getAllTasks() {
     const tasks = await Task.findAll();
-    console.log(tasks);
     return tasks;
   }
 

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const taskService = require('../services/task.service');
+const NotificationService = require('../services/notification.service');
+const TaskListService = require('../services/taskList.service');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 
@@ -25,9 +27,20 @@ router.get('/:taskId', async (req, res) => {
 });
 
 router.post('/', authMiddleware, async (req, res) => {
-  const { userId } = req;
   try {
-    const task = await taskService.createTask(req.body, userId);
+    const task = await taskService.createTask(req.body);
+
+    // send notification to all users in task list
+    const { userId } = req;
+
+    const taskList = await TaskListService.getTaskListById(req.body.taskListId, userId);
+
+    const users = await taskList.getAllUsers();
+
+    users.forEach(async user => {
+      await NotificationService.sendNotification(user.id, 'Task created');
+    });
+
     res.status(201).json(task);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -36,9 +49,20 @@ router.post('/', authMiddleware, async (req, res) => {
 
 // Actualizar una tarea
 router.put('/:taskId', authMiddleware, async (req, res) => {
-  const { userId } = req;
   try {
-    const updatedTask = await taskService.updateTask(req.params.taskId, req.body, userId);
+    const updatedTask = await taskService.updateTask(req.params.taskId, req.body);
+
+    // send notification to all users in task list
+    const { userId } = req;
+
+    const taskList = await TaskListService.getTaskListById(req.body.taskListId, userId);
+
+    const users = await taskList.getAllUsers();
+
+    users.forEach(async user => {
+      await NotificationService.sendNotification(user.id, 'Task created');
+    });
+
     res.status(200).json(updatedTask);
   } catch (error) {
     res.status(400).json({ error: error.message });

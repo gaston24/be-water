@@ -1,12 +1,29 @@
+const { User } = require('../models');
+
 class NotificationService {
-    static sendNotification(user, message) {
-      console.log(`send notification to user: ${user}: ${message}`);
+
+    async getUserById(userId) {
+      return User.findByPk(userId);
+    }
+
+    async sendNotification(user, message) {
+
+      const userToSend = await this.getUserById(user);
+
+      console.log(`send notification to user: ${userToSend.userName}: ${message}`);
+
+      return true;
     }
   
-    static sendEmail(user, subject) {
-      console.log(`send email to user: ${user} with subject: ${subject}`);
+    async sendEmail(user, subject) {
+
+      const userToSend = await this.getUserById(user);
+
+      console.log(`send email to user: ${userToSend.email} with subject: ${subject}`);
+
+      return true;
     }
   }
   
-  module.exports = NotificationService;
+  module.exports = new NotificationService();
   
