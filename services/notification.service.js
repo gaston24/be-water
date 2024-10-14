@@ -10,7 +10,9 @@ class NotificationService {
 
       const userToSend = await this.getUserById(user);
 
+      console.log(`=====================================================================`);
       console.log(`send notification to user: ${userToSend.userName}: ${message}`);
+      console.log(`=====================================================================`);
 
       return true;
     }
@@ -19,7 +21,9 @@ class NotificationService {
 
       const userToSend = await this.getUserById(user);
 
+      console.log(`=====================================================================`);
       console.log(`send email to user: ${userToSend.email} with subject: ${subject}`);
+      console.log(`=====================================================================`);
 
       return true;
     }

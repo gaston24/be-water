@@ -28,10 +28,11 @@ router.get('/:taskId', async (req, res) => {
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const task = await taskService.createTask(req.body);
-
-    // send notification to all users in task list
     const { userId } = req;
+
+    const task = await taskService.createTask(req.body, userId);
+
+    // // send notification to all users in task list
 
     const taskList = await TaskListService.getTaskListById(req.body.taskListId, userId);
 
@@ -50,10 +51,12 @@ router.post('/', authMiddleware, async (req, res) => {
 // Actualizar una tarea
 router.put('/:taskId', authMiddleware, async (req, res) => {
   try {
-    const updatedTask = await taskService.updateTask(req.params.taskId, req.body);
+
+    const { userId } = req;
+
+    const updatedTask = await taskService.updateTask(req.params.taskId, req.body, userId);
 
     // send notification to all users in task list
-    const { userId } = req;
 
     const taskList = await TaskListService.getTaskListById(req.body.taskListId, userId);
 

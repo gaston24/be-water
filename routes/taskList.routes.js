@@ -47,17 +47,21 @@ router.delete('/:taskListId', authMiddleware, async (req, res) => {
   const { userId } = req;
   try {
 
-    const message = await taskListService.deleteTaskList(req.params.taskListId);
-
-    // send notification to all users in task list
     const taskList = await taskListService.getTaskListByTaskListId(req.params.taskListId)
 
     const users = await taskList.getAllUsers();
 
-    users.forEach(async user => {
-      await NotificationService.sendNotification(user.id, 'Task has been deleted');
-    });
+    const message = await taskListService.deleteTaskList(req.params.taskListId, userId);
+    
+    // send notification to all users in task list
 
+    if (users.length > 0) {
+      
+      users.forEach(async user => {
+        await NotificationService.sendNotification(user.id, 'Task has been deleted');
+      });
+
+    }
 
     res.status(200).json(message);
   } catch (error) {
@@ -78,7 +82,7 @@ router.post('/share/:taskListId/:sharedToId/:permission', authMiddleware, async 
     NotificationService.sendNotification(sharedToId, `You have been shared a task list`);
 
     res.json(result);
-    
+
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
