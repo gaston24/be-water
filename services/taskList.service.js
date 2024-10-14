@@ -1,4 +1,4 @@
-const { TaskList } = require('../models');
+const { TaskList, Task, User } = require('../models');
 
 class TaskListService {
   
@@ -11,12 +11,37 @@ class TaskListService {
   }
 
   async getAllTaskLists() {
-    return await TaskList.findAll();
+    return await TaskList.findAll({
+      include: [
+        {
+          model: Task, 
+          as: 'Tasks' 
+        },
+        {
+          model: User, 
+          as: 'User', 
+          attributes: ['firstName', 'lastName', 'email'] 
+        }
+      ]
+    });
   }
 
 
   async getTaskListById(taskListId) {
-    const taskList = await TaskList.findByPk(taskListId);
+    const taskList = await TaskList.findByPk(taskListId, {
+      include: [
+        {
+          model: Task,
+          as: 'Tasks'
+        },
+        {
+          model: User,
+          as: 'User',
+          attributes: ['firstName', 'lastName', 'email'] 
+        }
+      ]
+    });
+
     if (!taskList) {
       throw new Error('Task list not found');
     }
