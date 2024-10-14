@@ -19,6 +19,16 @@ class TaskService {
     return task;
   }
 
+  // Crear una tarea
+  async createTask(data) {
+    return await Task.create({
+      name: data.name,
+      description: data.description,
+      task_list_id: data.taskListId,
+    });
+  }
+
+
   // Actualizar una tarea
   async updateTask(taskId, taskData) {
     const task = await Task.findByPk(taskId);

@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const taskService = require('../services/task.service');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const tasks = taskService.getAllTasks();
+    const tasks = await taskService.getAllTasks();
     res.status(200).json(tasks);
   }
   catch (error) {
@@ -19,6 +19,15 @@ router.get('/:taskId', async (req, res) => {
     res.status(200).json(task);
   } catch (error) {
     res.status(404).json({ error: error.message });
+  }
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const task = await taskService.createTask(req.body);
+    res.status(201).json(task);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 
