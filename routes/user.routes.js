@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const userService = require('../services/user.service');
 
-router.post('/', async (req, res) => {
-  const user = await userService.createUser(req.body);
-  res.status(201).json(user);
-});
+// router.post('/', async (req, res) => {
+//   const user = await userService.createUser(req.body);
+//   res.status(201).json(user);
+// });
 
 router.get('/', async (req, res) => {
   const users = await userService.getAllUsers();
