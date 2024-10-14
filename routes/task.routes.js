@@ -5,6 +5,7 @@ const NotificationService = require('../services/notification.service');
 const TaskListService = require('../services/taskList.service');
 const authMiddleware = require('../middlewares/auth.middleware');
 
+
 router.get('/', async (req, res) => {
   try {
     const tasks = await taskService.getAllTasks();
@@ -77,5 +78,26 @@ router.delete('/:taskId', async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 });
+
+// Crear un comentario en una tarea
+router.post('/comments/:taskId', authMiddleware, async (req, res) => {
+  try {
+    const comment = await taskService.createComment(req.params.taskId, req.userId, req.body.comment);
+    res.status(201).json(comment);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Obtener comentarios de una tarea
+router.get('/comments/:taskId', authMiddleware, async (req, res) => {
+  try {
+    const comments = await taskService.getComments(req.params.taskId);
+    res.json(comments);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+});
+
 
 module.exports = router;

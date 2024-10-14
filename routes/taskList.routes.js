@@ -33,16 +33,18 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/:taskListId', async (req, res) => {
+router.put('/:taskListId', authMiddleware, async (req, res) => {
+  const { userId } = req;
   try {
-    const updatedTaskList = await taskListService.updateTaskList(req.params.taskListId, req.body);
+    const updatedTaskList = await taskListService.updateTaskList(req.params.taskListId, req.body, userId);
     res.status(200).json(updatedTaskList);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.delete('/:taskListId', async (req, res) => {
+router.delete('/:taskListId', authMiddleware, async (req, res) => {
+  const { userId } = req;
   try {
 
     const message = await taskListService.deleteTaskList(req.params.taskListId);
@@ -56,6 +58,7 @@ router.delete('/:taskListId', async (req, res) => {
       await NotificationService.sendNotification(user.id, 'Task has been deleted');
     });
 
+
     res.status(200).json(message);
   } catch (error) {
     res.status(404).json({ error: error.message });
@@ -63,15 +66,21 @@ router.delete('/:taskListId', async (req, res) => {
 });
 
 
-router.post('/share/:taskListId/:sharedToId', authMiddleware, async (req, res) => {
+router.post('/share/:taskListId/:sharedToId/:permission', authMiddleware, async (req, res) => {
   const { userId } = req;
-  const { taskListId, sharedToId } = req.params;
 
-  try {
-    const result = await taskListService.shareTaskList(taskListId, userId, sharedToId);
+//   const { taskListId, sharedToId } = req.params;
+
+//   try {
+//     const result = await taskListService.shareTaskList(taskListId, userId, sharedToId);
 
     // send notification to sharedToId
-    NotificationService.sendNotification(sharedToId, `You have been shared a task list`);
+//     NotificationService.sendNotification(sharedToId, `You have been shared a task list`);
+
+
+//   const { taskListId, sharedToId, permission } = req.params;
+  try {
+    const result = await taskListService.shareTaskList(taskListId, userId, sharedToId, permission);
 
     res.json(result);
   } catch (error) {
