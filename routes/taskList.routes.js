@@ -68,21 +68,17 @@ router.delete('/:taskListId', authMiddleware, async (req, res) => {
 
 router.post('/share/:taskListId/:sharedToId/:permission', authMiddleware, async (req, res) => {
   const { userId } = req;
+  const { taskListId, sharedToId, permission } = req.params;
 
-//   const { taskListId, sharedToId } = req.params;
-
-//   try {
-//     const result = await taskListService.shareTaskList(taskListId, userId, sharedToId);
-
-    // send notification to sharedToId
-//     NotificationService.sendNotification(sharedToId, `You have been shared a task list`);
-
-
-//   const { taskListId, sharedToId, permission } = req.params;
   try {
+
     const result = await taskListService.shareTaskList(taskListId, userId, sharedToId, permission);
 
+    // send notification to sharedToId
+    NotificationService.sendNotification(sharedToId, `You have been shared a task list`);
+
     res.json(result);
+    
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

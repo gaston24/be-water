@@ -175,7 +175,7 @@ class TaskListService {
     return { message: 'Task list deleted successfully' };
   }
   
-  async shareTaskList(taskListId, ownerId, sharedToId, permission) {
+  async shareTaskList(taskListId, ownerId, sharedToId, permission = 'R') {
     const taskList = await TaskList.findOne({
       where: {
         id: taskListId,
