@@ -1,11 +1,10 @@
-const { Task, TaskList } = require('../models');
+const { Task } = require('../models');
 
 class TaskService {
 
   // Traer todas las tareas
   async getAllTasks() {
     const tasks = await Task.findAll();
-    console.log(tasks);
     return tasks;
   }
 

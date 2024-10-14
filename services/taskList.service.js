@@ -40,7 +40,29 @@ class TaskListService {
       ]
     });
   }
+
+  async getTaskListByTaskListId(taskListId) {
+    return await TaskList.findByPk(taskListId, {
+      include: [
+        {
+          model: Task,
+          as: 'Tasks'
+        },
+        {
+          model: User,
+          as: 'User',
+          attributes: ['firstName', 'lastName', 'email']
+        },
+        {
+          model: TaskListUser,
+          as: 'SharedUsers',
+          required: false,
+        }
+      ]
+    });
+  }
   
+
   async getTaskListById(taskListId, userId) {
     const taskList = await TaskList.findOne({
       where: {
@@ -147,6 +169,12 @@ class TaskListService {
     });
   
     return { message: 'Task list unshared successfully' };
+  }
+
+  async getAllUsers(taskListId) {
+    const taskList = await TaskListUser.findByPk(taskListId);
+
+    return await taskList.getUsersInTaskList();
   }
   
 
