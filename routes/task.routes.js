@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const taskService = require('../services/task.service');
+const authMiddleware = require('../middlewares/auth.middleware');
+
 
 router.get('/', async (req, res) => {
   try {
@@ -22,9 +24,10 @@ router.get('/:taskId', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
+  const { userId } = req;
   try {
-    const task = await taskService.createTask(req.body);
+    const task = await taskService.createTask(req.body, userId);
     res.status(201).json(task);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -32,9 +35,10 @@ router.post('/', async (req, res) => {
 });
 
 // Actualizar una tarea
-router.put('/:taskId', async (req, res) => {
+router.put('/:taskId', authMiddleware, async (req, res) => {
+  const { userId } = req;
   try {
-    const updatedTask = await taskService.updateTask(req.params.taskId, req.body);
+    const updatedTask = await taskService.updateTask(req.params.taskId, req.body, userId);
     res.status(200).json(updatedTask);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -50,5 +54,26 @@ router.delete('/:taskId', async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 });
+
+// Crear un comentario en una tarea
+router.post('/comments/:taskId', authMiddleware, async (req, res) => {
+  try {
+    const comment = await taskService.createComment(req.params.taskId, req.userId, req.body.comment);
+    res.status(201).json(comment);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Obtener comentarios de una tarea
+router.get('/comments/:taskId', authMiddleware, async (req, res) => {
+  try {
+    const comments = await taskService.getComments(req.params.taskId);
+    res.json(comments);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+});
+
 
 module.exports = router;

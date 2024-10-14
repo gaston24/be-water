@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Task.associate = function(models) {
-    Task.belongsTo(models.TaskList, { foreignKey: 'task_list_id', as: 'TaskList' }); 
+    Task.belongsTo(models.TaskList, { foreignKey: 'task_list_id', as: 'TaskList' });
+    Task.hasMany(models.TaskComment, { foreignKey: 'task_id', as: 'Comments' }); 
   };
 
   return Task;

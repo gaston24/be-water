@@ -2,61 +2,49 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('task_list_user', {
+    await queryInterface.createTable('task_comments', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
-      tasklist_id: {
+      task_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'task_lists',
-          key: 'id'
+          model: 'tasks',
+          key: 'id',
         },
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
       },
-      owner_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onDelete: 'CASCADE'
-      },
-      shared_to: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: 'users',
-          key: 'id'
+          key: 'id',
         },
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
       },
-      permission: {
-        type: Sequelize.STRING(1),
+      comment: {
+        type: Sequelize.TEXT,
         allowNull: false,
-        validate: {
-          isIn: [['R', 'E', 'D']],
-        }
       },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('now')
+        defaultValue: Sequelize.fn('now'),
       },
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('now')
-      }
+        defaultValue: Sequelize.fn('now'),
+      },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('task_list_user');
-  }
+    await queryInterface.dropTable('task_comments');
+  },
 };

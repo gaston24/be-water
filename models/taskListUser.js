@@ -25,6 +25,13 @@ module.exports = (sequelize, DataTypes) => {
         model: 'users',
         key: 'id'
       }
+    },
+    permission: {
+      type: DataTypes.STRING(1),
+      allowNull: false,
+      validate: {
+        isIn: [['R', 'E', 'D']],
+      }
     }
   }, {
     tableName: 'task_list_user',

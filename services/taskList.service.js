@@ -36,6 +36,11 @@ class TaskListService {
           model: TaskListUser,
           as: 'SharedUsers',
           required: false,
+          where: {
+            permission: {
+              [Op.or]: ['R', 'E', 'D']
+            }
+          }
         }
       ]
     });
@@ -59,44 +64,96 @@ class TaskListService {
         {
           model: TaskListUser,
           as: 'SharedUsers',
-          where: { shared_to: userId },
+          where: {
+            shared_to: userId,
+            permission: {
+              [Op.or]: ['R', 'E', 'D'], // Permisos de lectura, edición o eliminación
+            },
+          },
           required: false,
         },
       ],
     });
   
-    if (!taskList || (taskList.user_id !== userId && taskList.SharedUsers.length === 0)) {
-      throw new Error('Task list not found or not accessible');
-    }
-    
-    return taskList;
-  }
-
-  async updateTaskList(taskListId, taskListData) {
-    const taskList = await TaskList.findByPk(taskListId);
     if (!taskList) {
       throw new Error('Task list not found');
     }
+  
+    const isOwner = taskList.user_id === userId;
+    const hasPermission = taskList.SharedUsers.length > 0;
+  
+    if (!isOwner && !hasPermission) {
+      throw new Error('Task list not accessible');
+    }
+  
+    return taskList;
+  }
+  
 
+  async updateTaskList(taskListId, taskListData, userId) {
+    const taskList = await TaskList.findOne({
+      where: {
+        id: taskListId,
+        [Op.or]: [
+          { user_id: userId },  
+          {
+            '$SharedUsers.shared_to$': userId,  
+            '$SharedUsers.permission$': { [Op.or]: ['E', 'D'] }, 
+          },
+        ],
+      },
+      include: [
+        {
+          model: TaskListUser,
+          as: 'SharedUsers',
+          required: false,
+        },
+      ],
+    });
+  
+
+    if (!taskList) {
+      throw new Error('Task list not found or you do not have permission to update this task list');
+    }
+  
     await taskList.update({
       name: taskListData.name || taskList.name,
       description: taskListData.description || taskList.description,
     });
-
+  
     return taskList;
   }
-
-  async deleteTaskList(taskListId) {
-    const taskList = await TaskList.findByPk(taskListId);
+  
+  async deleteTaskList(taskListId, userId) {
+    const taskList = await TaskList.findOne({
+      where: {
+        id: taskListId,
+        [Op.or]: [
+          { user_id: userId },
+          {
+            '$SharedUsers.shared_to$': userId, 
+            '$SharedUsers.permission$': { [Op.or]: ['D'] }, 
+          },
+        ],
+      },
+      include: [
+        {
+          model: TaskListUser,
+          as: 'SharedUsers',
+          required: false,
+        },
+      ],
+    });
+  
     if (!taskList) {
-      throw new Error('Task list not found');
+      throw new Error('Task list not found or you do not have permission to delete this list');
     }
-
+  
     await taskList.destroy();
     return { message: 'Task list deleted successfully' };
   }
   
-  async shareTaskList(taskListId, ownerId, sharedToId) {
+  async shareTaskList(taskListId, ownerId, sharedToId, permission) {
     const taskList = await TaskList.findOne({
       where: {
         id: taskListId,
@@ -128,6 +185,7 @@ class TaskListService {
       tasklist_id: taskListId,
       owner_id: ownerId,
       shared_to: sharedToId,
+      permission: permission || 'R',
     });
   
     return { message: 'Task list shared successfully' };
