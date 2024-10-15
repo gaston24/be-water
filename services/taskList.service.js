@@ -25,7 +25,20 @@ class TaskListService {
       include: [
         {
           model: Task,
-          as: 'Tasks'
+          as: 'Tasks',
+          include: [
+            {
+              model: sequelize.models.TaskComment,
+              as: 'Comments', 
+              include: [
+                {
+                  model: sequelize.models.User,
+                  as: 'User',
+                  attributes: ['id', 'userName'] 
+                }
+              ]
+            }
+          ]
         },
         {
           model: User,
@@ -45,13 +58,26 @@ class TaskListService {
       ]
     });
   }
-
+  
   async getTaskListByTaskListId(taskListId) {
     return await TaskList.findByPk(taskListId, {
       include: [
         {
           model: Task,
-          as: 'Tasks'
+          as: 'Tasks',
+          include: [
+            {
+              model: sequelize.models.TaskComment,
+              as: 'Comments', 
+              include: [
+                {
+                  model: sequelize.models.User,
+                  as: 'User',
+                  attributes: ['id', 'userName'] 
+                }
+              ]
+            }
+          ]
         },
         {
           model: User,
@@ -77,6 +103,19 @@ class TaskListService {
         {
           model: Task,
           as: 'Tasks',
+          include: [
+            {
+              model: sequelize.models.TaskComment,
+              as: 'Comments', 
+              include: [
+                {
+                  model: sequelize.models.User,
+                  as: 'User',
+                  attributes: ['id', 'userName'] 
+                }
+              ]
+            }
+          ]
         },
         {
           model: User,
